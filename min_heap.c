@@ -16,12 +16,14 @@ void* get_me_blocks( ssize_t how_much ) {
 }
 
 void heap_insert(int size, char* pointer_to_start) {
-    chunk_on_heap* new_chunk = (chunk_on_heap*)(get_chunk(sizeof(chunk_on_heap)));
+    printf("Inserting chunk of size %d at %p\n", size, pointer_to_start);
+
+    chunk_on_heap* new_chunk = (chunk_on_heap*)(pointer_to_start);
     new_chunk->size = size;
     new_chunk->pointer_to_start = pointer_to_start;
     new_chunk->next = NULL;
     new_chunk->prev = NULL;
-
+    
     if(global_heap.head == NULL) {
         global_heap.head = new_chunk;
         global_heap.tail = new_chunk;
@@ -51,6 +53,8 @@ void heap_insert(int size, char* pointer_to_start) {
 
 //takes chunk from heap and returns a pointer to it
 void* get_chunk(int size) {
+    printf("Requesting chunk of size %d\n", size);
+
 
     chunk_on_heap* current = global_heap.head;
 
@@ -68,28 +72,18 @@ void* get_chunk(int size) {
         current = current->next;
     }
 
-        void* ptr = get_me_blocks(1024*1024*1024);
+        void* ptr = get_me_blocks(1024*1024);
         if(ptr == NULL) {
             return NULL;
         }
-        heap_insert(1024*1024*1024 - size, (char*)ptr + size);
-        
+        heap_insert(1024*1024 - size, (char*)ptr + size);
+        printf("Returning new chunk at %p\n", ptr);
+
         return ptr;
     
 
 }
-void alt_free(void* ptr) {
-    if (ptr == NULL) {
-        return;
-    }
 
-    // Calculate the size of the chunk to be freed
-    // This is a simplified example; in a real allocator, you would need to store the size of each allocated chunk
-    int size = 256; // Replace this with the actual size of the chunk
-
-    // Insert the freed chunk back into the heap
-    heap_insert(size, (char*)ptr);
-}
 
 void heap_remove(chunk_on_heap *chunk) {
     if(chunk->prev == NULL) {
