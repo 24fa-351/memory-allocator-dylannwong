@@ -5,8 +5,13 @@
 #include "memory_allocator.h"
 #include "min_heap.h"
 
-//allocate memory
+typedef struct {
+    void* ptr;
+    size_t size;
+} allocation;
 
+allocation allocations[1000];
+size_t num_ptrs = 0;
 
 char* alt_malloc(size_t size) {
     //void* ptr = get_me_blocks(sbrk_size);
@@ -19,12 +24,26 @@ char* alt_malloc(size_t size) {
     }
  
     fprintf(stderr, __FILE__ ":%d malloc(%lu) = %p\n", __LINE__, size, ptr);
+    
+    allocations[num_ptrs].ptr = ptr;
+    allocations[num_ptrs].size = size;
+    num_ptrs++;
+
     return ptr;
 }
 
 void alt_free(void* ptr) {
     fprintf(stderr, __FILE__ ": free(%p)\n", ptr);
-    free(ptr);
+    for(size_t i = 0; i < num_ptrs; i++) {
+        if(allocations[i].ptr == ptr) {
+            free_chunk(ptr, allocations[i].size);
+            allocations[i] = allocations[num_ptrs - 1];
+            num_ptrs--;
+            return;
+        }
+    }
+    fprintf(stderr, "Pointer not found in allocations\n");
+
 }
 
 //malloc but multiply the size and num

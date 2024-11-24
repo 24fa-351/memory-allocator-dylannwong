@@ -16,6 +16,7 @@ typedef struct{
   chunk_on_heap *data;
   int size;
 } heap;
+void free_chunk(void* ptr, int size);
 
 void heap_remove(chunk_on_heap *chunk);
 
