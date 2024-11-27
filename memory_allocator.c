@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "memory_allocator.h"
 #include "min_heap.h"
@@ -14,7 +15,6 @@ allocation allocations[1000];
 size_t num_ptrs = 0;
 
 char* alt_malloc(size_t size) {
-    //void* ptr = get_me_blocks(sbrk_size);
 
     char* ptr = get_chunk(size);
 
@@ -42,16 +42,28 @@ void alt_free(void* ptr) {
             return;
         }
     }
-    fprintf(stderr, "Pointer not found in allocations\n");
+    fprintf(stderr, "Pointer not found\n");
 
 }
 
 //malloc but multiply the size and num
-char *alt_calloc(size_t num, size_t size) {
+char* alt_calloc(size_t num, size_t size) {
     return malloc(num * size);
 }
 //take allocated ptr and allocate to new size
 void* alt_realloc(void* ptr, size_t size) {
-    //one line
-    NULL;
+
+    for (int i = 0; i < num_ptrs; i++) {
+        if (allocations[i].ptr == ptr) {
+            void* new_ptr = alt_malloc(size);
+            if (new_ptr == NULL) {
+                return NULL;
+            }
+            memcpy(new_ptr, ptr, allocations[i].size < size ? allocations[i].size : size);
+            alt_free(ptr);
+            return new_ptr;
+        }
+    }
+    fprintf(stderr, "Pointer not found\n");
+    return NULL;
 }
